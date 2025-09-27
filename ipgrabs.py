@@ -1,10 +1,52 @@
-# app.py
+
+#fsociety - anonymous
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # run: pip install flask requests
+import sys
 import os
 import requests
 from flask import Flask, request, Response
 from datetime import datetime
 
+sys.stdout.reconfigure(line_buffering=True)
 app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
@@ -53,9 +95,9 @@ def index():
  As        : {as_host}
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 """
+        # log to server console with flush
+        print(out, flush=True)
 
-        # log to server console
-        print(out)
 
         # return to visitor
         return Response(f"<pre>hello</pre>", mimetype="text/html")
