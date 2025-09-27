@@ -1,5 +1,5 @@
-# save as app.py
-# requires: pip install flask requests
+# app.py
+# run: pip install flask requests
 import os
 import requests
 from flask import Flask, request, Response
@@ -7,39 +7,15 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# --- tiny helpers matching your snippet semantics ---
-def Slow(text):
-    # show same output on server logs. no delay for web usage.
-    print(text)
-
-def current_time_hour():
-    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-
-def Continue():
-    pass
-
-def Reset():
-    pass
-
-def Error(e):
-    print("Error:", repr(e))
-
-# --- route ---
 @app.route("/", methods=["GET"])
 def index():
     try:
-        # get real visitor IP from X-Forwarded-For if present
+        # pick real IP
         xff = request.headers.get("X-Forwarded-For", "")
         if xff:
             visitor_ip = xff.split(",")[0].strip()
         else:
             visitor_ip = request.remote_addr or "Unknown"
-
-        # log similar to your CLI flow
-        map_banner = ""  # placeholder if you used a banner earlier
-        Slow(map_banner)
-        Slow(f"\n{current_time_hour()} Ip -> {visitor_ip}")
-        Slow(f"{current_time_hour()} Search for information..")
 
         # query ip-api
         resp = requests.get(f"http://ip-api.com/json/{visitor_ip}", timeout=6)
@@ -59,9 +35,11 @@ def index():
         org = api.get("org", "None")
         as_host = api.get("as", "None")
 
-        # formatted output (server log)
+        # build block
         out = f"""
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Time      : {datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")}
+ Visitor IP: {visitor_ip}
  Status    : {status}
  Country   : {country} ({country_code})
  Region    : {region} ({region_code})
@@ -75,20 +53,15 @@ def index():
  As        : {as_host}
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 """
-        Slow(out)
-        Continue()
-        Reset()
 
-        # return readable HTML response to visitor
-        html = f"""<pre>
-Visitor IP: {visitor_ip}
+        # log to server console
+        print(out)
 
-{out}
-</pre>"""
-        return Response(html, mimetype="text/html")
+        # return to visitor
+        return Response(f"<pre>hello</pre>", mimetype="text/html")
 
     except Exception as e:
-        Error(e)
+        print("Error:", e)
         return Response(f"Error: {e}", status=500, mimetype="text/plain")
 
 if __name__ == "__main__":
